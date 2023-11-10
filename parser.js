@@ -14,27 +14,25 @@ async function main() {
     // Переходим на страницу.
     await page.goto(url, { waitUntil: 'networkidle0' });
     
-    // Функция для автопрокрутки страницы.
-    async function autoScroll(page) {
+       // Функция для автопрокрутки страницы.
+    const autoScroll = async (page) => {
         await page.evaluate(async () => {
-            await new Promise((resolve, reject) => {
-                var totalHeight = 0; // Общая высота прокрученного контента.
-                var distance = 100; // Количество пикселей, на которое мы будем прокручивать страницу за одну итерацию.
-                var timer = setInterval(() => {
-                    var scrollHeight = document.body.scrollHeight; // Общая высота страницы.
-                    window.scrollBy(0, distance); // Прокручиваем страницу на заданное количество пикселей.
-                    totalHeight += distance;
-
-                    // Если прокрутили страницу до конца, останавливаем таймер.
-                    if (totalHeight >= scrollHeight) { 
+            await new Promise((resolve) => {
+                let totalHeight = 0;// Общая высота прокрученного контента.
+                let distance = 100;// Количество пикселей, на которое мы будем прокручивать страницу за одну итерацию.
+                const timer = setInterval(() => {
+                    const scrollHeight = document.body.scrollHeight;// Общая высота страницы. 
+                    window.scrollBy(0, distance);
+                    totalHeight += distance; // Прокручиваем страницу на заданное количество пикселей.
+          // Если прокрутили страницу до конца, останавливаем таймер.
+                    if(totalHeight >= scrollHeight){
                         clearInterval(timer);
                         resolve();
                     }
                 }, 100);
             });
         });
-    }
-
+    };
     // Прокручиваем страницу до конца.
     await autoScroll(page);
 
@@ -63,6 +61,11 @@ async function main() {
             
             // Выбираем нужные элементы на карточке продукта и сохраняем информацию.
             let linkElement = productCard.querySelector('[data-tag="cardLink"]');
+            if (linkElement) {
+                const href = linkElement.getAttribute('href');
+                const id = href.substring(href.indexOf('=')+1);
+                product.id = id; 
+            }
             let imgElement = productCard.querySelector('.card-img picture img');
             let priceElement = productCard.querySelector('[data-tag="salePrice"]');
             let oldPriceElement = productCard.querySelector('.price__old del');
